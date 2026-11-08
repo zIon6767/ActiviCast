@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ActiviCast turns live local weather into practical activity recommendations and finds your best time to get outside.">
+  <meta name="theme-color" content="#071426">
+  <title>ActiviCast — Weather that tells you what to do</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='16' width='64' height='64' fill='%2312b886'/%3E%3Cpath d='M18 38a13 13 0 1 1 22-12h3a8 8 0 1 1 0 16H19a6 6 0 0 1-1-12' fill='none' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#dashboard" aria-label="ActiviCast home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none"><path d="M10 28.5a10 10 0 0 1 18-6A7.5 7.5 0 1 1 31.5 36H11a5.5 5.5 0 0 1-1-10.9" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="m18 32 4-7 4 7 4-7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="brand-word">Activi<span>Cast</span></span>
+      </a>
+
+      <nav class="primary-nav" aria-label="Main navigation">
+        <button class="nav-link active" data-scroll="dashboard">Dashboard</button>
+        <button class="nav-link" id="navPlanner">Plan an activity</button>
+        <button class="nav-link" data-scroll="forecastSection">7-day outlook</button>
+      </nav>
+
+      <div class="search-wrap" id="searchWrap">
+        <form class="search-box" id="searchForm" role="search" autocomplete="off">
+          <span id="searchIcon"></span>
+          <label class="sr-only" for="citySearch">Search city or postcode</label>
+          <input id="citySearch" type="search" placeholder="Search city or postcode" aria-expanded="false" aria-controls="searchResults">
+          <span class="search-spinner" id="searchSpinner" hidden></span>
+          <kbd class="search-hint">/</kbd>
+        </form>
+        <div class="search-results" id="searchResults" role="listbox" hidden></div>
+      </div>
+
+      <button class="icon-btn locate-btn" id="locateBtn" type="button" title="Use current location" aria-label="Use current location"><span id="locateIcon"></span></button>
+      <button class="settings-btn" id="settingsBtn" type="button" aria-label="Settings"><span id="settingsIcon"></span><span>Settings</span></button>
+    </div>
+  </header>
+
+  <div class="connection-banner" id="connectionBanner" hidden></div>
+
+  <main id="main">
+    <div class="page-shell" id="dashboard">
+      <section class="hero-grid" aria-label="Current weather and recommendation">
+        <article class="weather-hero glass" id="weatherHero">
+          <div class="weather-pattern" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="hero-topline">
+            <div>
+              <div class="location-line">
+                <span id="pinIcon"></span>
+                <h1 id="locationName">Loading weather…</h1>
+                <span class="country-flag" id="countryFlag"></span>
+              </div>
+              <p class="subdued" id="localDate">Finding your local forecast</p>
+            </div>
+            <div class="freshness">
+              <span class="live-dot"></span>
+              <span id="freshnessText">LIVE</span>
+              <button class="refresh-btn" id="refreshBtn" type="button" aria-label="Refresh weather"><span id="refreshIcon"></span></button>
+            </div>
+          </div>
+
+          <div class="weather-main">
+            <div class="weather-visual">
+              <div class="weather-icon-xl" id="currentWeatherIcon"></div>
+              <div class="temp-block">
+                <div class="temp-now" id="tempNow">--°</div>
+                <div>
+                  <div class="condition" id="conditionNow">Loading</div>
+                  <div class="feels" id="feelsNow">Feels like --°</div>
+                </div>
+              </div>
+            </div>
+            <div class="today-range">
+              <div><span class="range-arrow high">↑</span><b id="todayHigh">--°</b><small>High</small></div>
+              <div><span class="range-arrow low">↓</span><b id="todayLow">--°</b><small>Low</small></div>
+            </div>
+          </div>
+
+          <div class="metric-row" id="currentMetrics">
+            <div class="metric"><span id="rainMetricIcon"></span><div><b id="rainNow">--%</b><small>Rain</small></div></div>
+            <div class="metric"><span id="windMetricIcon"></span><div><b id="windNow">--</b><small id="windUnitNow">Wind</small></div></div>
+            <div class="metric"><span id="humidityMetricIcon"></span><div><b id="humidityNow">--%</b><small>Humidity</small></div></div>
+            <div class="metric"><span id="uvMetricIcon"></span><div><b id="uvNow">--</b><small>UV index</small></div></div>
+            <div class="metric"><span id="airMetricIcon"></span><div><b id="airNow">--</b><small>US AQI</small></div></div>
+          </div>
+        </article>
+
+        <article class="decision-card glass" id="decisionCard">
+          <div class="section-eyebrow"><span id="sparkIcon"></span>YOUR OUTDOOR BRIEF</div>
+          <h2 id="briefHeadline">Analysing local conditions…</h2>
+          <p id="briefText" class="brief-text">Comparing temperature, rain, wind, UV and air quality across your activities.</p>
+
+          <div class="best-now" id="bestNow">
+            <div class="best-icon" id="bestIcon"></div>
+            <div class="best-copy"><small>BEST RIGHT NOW</small><b id="bestActivity">—</b><span id="bestReason">Calculating score</span></div>
+            <div class="score-orbit" id="bestScore" style="--score:0;--score-color:#12b886"><span>--</span><small>/100</small></div>
+          </div>
+
+          <div class="brief-list">
+            <div class="brief-item"><span class="brief-symbol good" id="clockBriefIcon"></span><div><small>WHAT'S NEXT</small><b id="nextChange">Checking the next 12 hours…</b></div></div>
+            <div class="brief-item"><span class="brief-symbol warn" id="alertBriefIcon"></span><div><small>MAIN WATCH-OUT</small><b id="mainWatch">No major concerns found</b></div></div>
+          </div>
+          <button class="primary-btn full" id="findWindowHero" type="button"><span id="targetIcon"></span> Find my best time</button>
+        </article>
+      </section>
+
+      <section class="alerts-section" id="alertsSection" hidden>
+        <div class="section-heading compact">
+          <div><span class="section-eyebrow">WEATHER WATCH</span><h2>Heads-up for the next 12 hours</h2></div>
+          <div class="alert-count" id="alertCount"></div>
+        </div>
+        <div class="alert-strip" id="alertStrip"></div>
+      </section>
+
+      <section class="activity-section" id="activitySection">
+        <div class="section-heading">
+          <div>
+            <span class="section-eyebrow">LIVE ACTIVITY INDEX</span>
+            <h2>What works outside right now?</h2>
+            <p>Scores update from live conditions and your personal comfort settings.</p>
+          </div>
+          <div class="section-actions">
+            <div class="legend" aria-label="Score legend"><span><i class="lg excellent"></i>Excellent</span><span><i class="lg good"></i>Good</span><span><i class="lg fair"></i>Fair</span><span><i class="lg poor"></i>Poor</span></div>
+            <button class="soft-btn" id="customizeBtn" type="button"><span id="slidersIcon2"></span> Customize</button>
+          </div>
+        </div>
+        <div class="activity-grid" id="activityGrid" aria-live="polite"></div>
+      </section>
+
+      <section class="insights-grid">
+        <article class="panel glass hourly-panel">
+          <div class="panel-head">
+            <div><span class="section-eyebrow">NEXT 24 HOURS</span><h2>Conditions at a glance</h2></div>
+            <div class="chart-key"><span><i class="temp-key"></i>Feels like</span><span><i class="rain-key"></i>Rain chance</span></div>
+          </div>
+          <div class="hourly-scroll" id="hourlyScroll">
+            <div class="hourly-chart" id="hourlyChart"></div>
+          </div>
+        </article>
+
+        <article class="panel glass sun-panel">
+          <div class="panel-head"><div><span class="section-eyebrow">DAYLIGHT & NIGHT SKY</span><h2>Plan around the light</h2></div><div id="moonGlyph" class="moon-glyph">◐</div></div>
+          <div class="sun-track"><span class="sun-line"></span><span class="sun-marker" id="sunMarker"></span></div>
+          <div class="sun-times">
+            <div><span id="sunriseIcon"></span><small>Sunrise</small><b id="sunriseTime">--:--</b></div>
+            <div class="daylight-total"><small>Daylight</small><b id="daylightTime">-- h -- m</b></div>
+            <div><span id="sunsetIcon"></span><small>Sunset</small><b id="sunsetTime">--:--</b></div>
+          </div>
+          <div class="moon-card">
+            <div><span class="moon-emoji" id="moonEmoji">◐</span><div><small>MOON TONIGHT</small><b id="moonName">—</b></div></div>
+            <span id="moonIllum">--% lit</span>
+          </div>
+          <button class="text-btn" id="stargazingShortcut" type="button">Check stargazing conditions <span>→</span></button>
+        </article>
+      </section>
+
+      <section class="forecast-section" id="forecastSection">
+        <div class="section-heading">
+          <div><span class="section-eyebrow">THE WEEK AHEAD</span><h2>7-day activity outlook</h2><p>Daily weather plus the best-scoring activity window.</p></div>
+          <span class="timezone-label" id="timezoneLabel"></span>
+        </div>
+        <div class="forecast-grid" id="forecastGrid"></div>
+      </section>
+
+      <section class="explain-section">
+        <div class="explain-copy">
+          <span class="section-eyebrow">MORE THAN A FORECAST</span>
+          <h2>Weather data, translated into decisions.</h2>
+          <p>ActiviCast weighs the conditions that actually matter for each activity — not just whether it rains.</p>
+        </div>
+        <div class="explain-factors">
+          <div><span id="factorThermo"></span><b>Feels-like comfort</b><small>Temperature, humidity & wind chill</small></div>
+          <div><span id="factorRain"></span><b>Forward-looking rain</b><small>Not just now — up to 24 hours ahead</small></div>
+          <div><span id="factorSafety"></span><b>Safety cut-offs</b><small>Lightning, ice, UV, air & hot pavement</small></div>
+          <div><span id="factorPersonal"></span><b>Your preferences</b><small>Comfort ranges and weather tolerance</small></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div><a class="brand footer-brand" href="#dashboard"><span class="brand-word">Activi<span>Cast</span></span></a><p>Weather that tells you what to do.</p></div>
+    <p>Weather & air-quality data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> · Recommendations are guidance, not medical advice.</p>
+  </footer>
+
+  <!-- Best-window planner -->
+  <div class="modal-layer" id="plannerLayer" hidden>
+    <div class="modal-backdrop" data-close="planner"></div>
+    <section class="modal planner-modal" role="dialog" aria-modal="true" aria-labelledby="plannerTitle">
+      <div class="modal-head">
+        <div><span class="section-eyebrow">SMART SCHEDULER</span><h2 id="plannerTitle">Find my best window</h2><p>We'll scan every forecast hour and rank the safest, most comfortable options.</p></div>
+        <button class="icon-btn close-btn" data-close="planner" aria-label="Close planner"><span class="close-icon"></span></button>
+      </div>
+      <form id="plannerForm" class="planner-form">
+        <div class="field wide"><label for="planActivity">I want to…</label><div class="select-wrap"><select id="planActivity"></select></div></div>
+        <div class="field"><label for="planDuration">For</label><div class="select-wrap"><select id="planDuration"><option value="1">1 hour</option><option value="2">2 hours</option><option value="3">3 hours</option><option value="4">4 hours</option></select></div></div>
+        <div class="field"><label for="planDay">On</label><div class="select-wrap"><select id="planDay"><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="48">Next 48 hours</option><option value="week">Next 7 days</option></select></div></div>
+        <div class="field"><label for="planEarliest">Not before</label><div class="select-wrap"><select id="planEarliest"></select></div></div>
+        <div class="field"><label for="planLatest">Finish by</label><div class="select-wrap"><select id="planLatest"></select></div></div>
+        <button class="primary-btn planner-submit" type="submit"><span class="planner-target"></span> Find the best time</button>
+      </form>
+      <div class="planner-empty" id="plannerEmpty">
+        <div class="empty-orbit"><span id="plannerEmptyIcon"></span></div>
+        <h3>Tell us your plan</h3><p>We'll compare rain, temperature, wind, daylight and activity-specific risks hour by hour.</p>
+      </div>
+      <div class="planner-results" id="plannerResults" hidden></div>
+    </section>
+  </div>
+
+  <!-- Activity details -->
+  <div class="modal-layer" id="detailLayer" hidden>
+    <div class="modal-backdrop" data-close="detail"></div>
+    <section class="modal detail-modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="modal-head detail-head">
+        <div class="detail-title-row"><span class="activity-symbol lg" id="detailIcon"></span><div><span class="section-eyebrow" id="detailEyebrow">ACTIVITY BREAKDOWN</span><h2 id="detailTitle">Activity</h2></div></div>
+        <button class="icon-btn close-btn" data-close="detail" aria-label="Close details"><span class="close-icon"></span></button>
+      </div>
+      <div id="detailContent"></div>
+    </section>
+  </div>
+
+  <!-- Settings drawer -->
+  <div class="drawer-layer" id="settingsLayer" hidden>
+    <div class="modal-backdrop" data-close="settings"></div>
+    <aside class="settings-drawer" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="drawer-head"><div><span class="section-eyebrow">PERSONALISE</span><h2 id="settingsTitle">Settings</h2></div><button class="icon-btn close-btn" data-close="settings" aria-label="Close settings"><span class="close-icon"></span></button></div>
+      <div class="drawer-body">
+        <section class="setting-section"><h3>Units & time</h3><div class="setting-row"><span>Temperature</span><div class="segmented" data-setting="temp"><button data-value="C">°C</button><button data-value="F">°F</button></div></div><div class="setting-row"><span>Wind speed</span><div class="segmented" data-setting="wind"><button data-value="kmh">km/h</button><button data-value="mph">mph</button><button data-value="ms">m/s</button></div></div><div class="setting-row"><span>Clock</span><div class="segmented" data-setting="time"><button data-value="24">24h</button><button data-value="12">12h</button></div></div></section>
+        <section class="setting-section"><h3>Rain tolerance</h3><p>How much chance of rain should lower your scores?</p><div class="radio-stack" id="rainTolerance"></div></section>
+        <section class="setting-section"><h3>My dashboard</h3><p>Choose the activities you want to score.</p><div class="activity-toggles" id="activityToggles"></div></section>
+        <section class="setting-section"><h3>Comfort thresholds</h3><p>Adjust what “comfortable” means to you. Temperature values are stored in Celsius.</p><div class="thresholds" id="thresholds"></div></section>
+        <section class="setting-section demo-section"><h3>Test scenarios</h3><p>Preview the complete interface with controlled conditions — useful for your project demonstration.</p><div class="demo-buttons"><button class="scenario-btn" data-scenario="live">Live weather</button><button class="scenario-btn" data-scenario="fair">Fair day</button><button class="scenario-btn" data-scenario="rainy">Rain & storms</button><button class="scenario-btn" data-scenario="heatwave">Heatwave</button></div></section>
+      </div>
+      <div class="drawer-footer"><button class="ghost-btn" id="resetSettings" type="button">Reset defaults</button><button class="primary-btn" id="doneSettings" type="button">Done</button></div>
+    </aside>
+  </div>
+
+  <!-- First-use location prompt -->
+  <div class="welcome-card" id="welcomeCard" hidden>
+    <button class="welcome-close" id="welcomeClose" aria-label="Dismiss">×</button>
+    <span class="welcome-icon" id="welcomePin"></span>
+    <div><b>Make it local</b><p>Use your location for an accurate forecast, or search any city above.</p></div>
+    <button class="primary-btn" id="welcomeLocate">Use my location</button>
+  </div>
+
+  <!-- App loading / fatal error -->
+  <div class="app-state" id="appState">
+    <div class="state-card">
+      <div class="loader-logo"><span></span><span></span><span></span></div>
+      <h2 id="stateTitle">Reading the sky…</h2><p id="stateText">Fetching live local weather and building your activity forecast.</p>
+      <div class="state-actions" id="stateActions" hidden><button class="primary-btn" id="stateRetry">Try again</button><button class="soft-btn" id="stateDemo">Use demo weather</button></div>
+    </div>
+  </div>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
